@@ -1,0 +1,56 @@
+let p = import "hern:parser";
+
+let input = read_file("../.input/02").trim();
+
+let dimension = do {
+  let a <- p.natural();
+  p.tag("x");
+  let b <- p.natural();
+  p.tag("x");
+  let c <- p.natural();
+  pure((a, b, c))
+};
+
+let all_dimensions = p.sep_by(dimension, p.whitespace());
+
+let result = match p.run(all_dimensions, input) {
+  Ok((_, res)) -> res,
+  Err(e) -> {
+    print("Error parsing input: " <> e);
+    []
+  }
+};
+
+fn solve(data) {
+  let mut total_paper = 0;
+  let mut total_ribbon = 0;
+
+  for (l, w, h) in data {
+    let s1 = l * w;
+    let s2 = w * h;
+    let s3 = h * l;
+
+    let mut min_side = s1;
+    if s2 < min_side { min_side = s2 };
+    if s3 < min_side { min_side = s3 };
+
+    total_paper = total_paper + (2 * s1 + 2 * s2 + 2 * s3 + min_side);
+
+    let r1 = l + w;
+    let r2 = w + h;
+    let r3 = h + l;
+    let mut min_r = r1;
+    if r2 < min_r { min_r = r2 };
+    if r3 < min_r { min_r = r3 };
+    let volume = l * w * h;
+    total_ribbon = total_ribbon + (2 * min_r + volume);
+  };
+
+  (total_paper, total_ribbon)
+}
+
+let (a, b) = solve(result);
+
+print("Day 2");
+print("a: " <> tostring(a));
+print("b: " <> tostring(b));
